@@ -1,7 +1,10 @@
 package main
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
-func MainTest(m *testing.M) {
-
+func TestMain(m *testing.M) {
+	os.Exit(m.Run())
 }
