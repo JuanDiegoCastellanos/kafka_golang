@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"log"
 )
 
 func main() {
@@ -15,5 +16,18 @@ func main() {
 		fmt.Printf("Failed to create producer: %s\n", err)
 
 	}
+	deliverych := make(chan kafka.Event, 10000)
+	topic := "HVSE"
+	err = p.Produce(&kafka.Message{
+		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+		Value:          []byte("FOO")},
+		deliverych,
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	e := <-deliverych
+	fmt.Printf("%+v\n", e.String())
 	fmt.Printf("%+v\n", p)
 }
