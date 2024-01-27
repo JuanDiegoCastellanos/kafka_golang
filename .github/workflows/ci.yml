@@ -15,8 +15,8 @@ jobs:
       kafka-zookeeper:
         image: juandiegocastellanosj/kafka-kaste:v1.0
         credentials:
-          username: juandiegocastellanosj
-          password:  @Manolo221212
+          username: "juandiegocastellanosj"
+          password: "@Manolo221212"
         env:
           ZOOKEEPER_CLIENT_PORT: 2181
           ZOOKEEPER_TICK_TIME: 2000
@@ -24,8 +24,8 @@ jobs:
       kafka-broker:
         image: juandiegocastellanosj/kafka-kaste:v1.0
         credentials:
-          username: juandiegocastellanosj
-          password: @Manolo221212
+          username: "juandiegocastellanosj"
+          password: "@Manolo221212"
         env:
           KAFKA_BROKER_ID: 1
           KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
