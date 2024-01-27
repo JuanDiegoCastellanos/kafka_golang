@@ -5,14 +5,12 @@ LABEL authors="Juan Diego Castellanos Jerez"
 RUN apk --no-cache update && apk --no-cache add wget bash openjdk8 curl \
     && rm -rf /var/cache/apk/*
 
-
-# Me queda pendiente hacer que se exponga el servicio de zookeeper y despues crear el
-# container de kafka broker para conectarlos
-
 WORKDIR ./
-COPY persistence/kafka-3.6.0-src ./
-#RUN cd kafka-3.6.0-src/
-RUN chmod +x ./gradlew
-RUN ./gradlew jar -PscalaVersion=2.13.11
-#RUN chmod +x ./gradlew && ./gradlew jar -PscalaVersion=2.13.11
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+COPY persistence/kafka_2.13-3.6.1 ./
+RUN  KAFKA_CLUSTER_ID=$(bin/kafka-storage.sh random-uuid) && \
+     bin/kafka-storage.sh format --config config/kraft/server.properties --cluster-id $KAFKA_CLUSTER_ID
+#CMD ./bin/kafka-storage.sh format -t $KAFKA_CLUSTER_ID -c config/kraft/server.properties
+#CMD ["bin/kafka-storage.sh format", "--config config/kraft/server.properties", "--cluster-id $KAFKA_CLUSTER_ID"]
+CMD ["bin/kafka-server-start.sh", "config/kraft/server.properties"]
+#ENTRYPOINT ["tail", "-f", "/dev/null"]
+EXPOSE 9092
