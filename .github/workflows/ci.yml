@@ -1,4 +1,4 @@
-name: Go
+name: go-ci-test
 
 on:
   push:
@@ -7,19 +7,56 @@ on:
     branches: [ "main" ]
 
 jobs:
-
-  build:
+  test:
+    name: Test
     runs-on: ubuntu-latest
+
+    services:
+      kafka-zookeeper:
+        image: juandiegocastellanosj/kafka-kaste:v1.0
+        credentials:
+          username: juandiegocastellanosj
+          password:  @Manolo221212
+        env:
+          ZOOKEEPER_CLIENT_PORT: 2181
+          ZOOKEEPER_TICK_TIME: 2000
+
+      kafka-broker:
+        image: juandiegocastellanosj/kafka-kaste:v1.0
+        credentials:
+          username: juandiegocastellanosj
+          password: @Manolo221212
+        env:
+          KAFKA_BROKER_ID: 1
+          KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092, PLAINTEXT_INTERNAL://broker:29092
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+          KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+          KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+        ports:
+          - 9092:9092
     steps:
     - uses: actions/checkout@v3
-
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: '1.20'
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v3
+
+    - name: Get dependencies
+      run: |
+        go get -v -t -d ./...
+        if [-f Gopkg.toml ]; then
+          curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+          dep ensure
+        fi
 
     - name: Build
-      run: go build -v ./...
+      run: make build
 
     - name: Test
-      run: go test -v ./...
+      run: make test
